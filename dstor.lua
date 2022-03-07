@@ -34,6 +34,42 @@ function parse_key(key)
     return true, keyInTable, column
 end
 
+function resolve_all_data(store, column)
+    local out = {}
+    for k, value in pairs(store) do
+
+        if column and type(value) == 'table' then
+            out[k] = filter_column(value, column)
+        elseif not column then
+            out[k] = value
+        end
+
+    end
+    return out
+end
+
+function resolve_data_by_key(store, column, key)
+    local out = {}
+    for k, value in pairs(store) do
+        local pattern              = '^' .. key .. '%.'
+        local indexStart, indexEnd = k:find(pattern)
+
+        if indexStart then
+            local theKey = k:sub(indexEnd + 1)
+
+            if column and type(value) == 'table' then
+                if value[column] then
+                    out[theKey] = filter_column(value, column)
+                end
+            elseif not column then
+                out[theKey] = value
+            end
+        end
+
+    end
+    return out
+end
+
 function Dstor.new()
     local this  = setmetatable({}, Dstor)
     this._store = {}
@@ -56,38 +92,9 @@ function Dstor:get(key)
     end
 
     if hasStar and not keyInTable then
-        local out = {}
-        for k, value in pairs(self._store) do
-
-            if column and type(value) == 'table' then
-                out[k] = filter_column(value, column)
-            elseif not column then
-                out[k] = value
-            end
-
-        end
-        return out
+        return resolve_all_data(self._store, column)
     end
 
-    local out = {}
-    for k, value in pairs(self._store) do
-        local pattern              = '^' .. keyInTable .. '%.'
-        local indexStart, indexEnd = k:find(pattern)
-
-        if indexStart then
-            local theKey = k:sub(indexEnd + 1)
-
-            if column and type(value) == 'table' then
-                if value[column] then
-                    out[theKey] = filter_column(value, column)
-                end
-            elseif not column then
-                out[theKey] = value
-            end
-        end
-
-    end
-
-    return out
+    return resolve_data_by_key(self._store, column, keyInTable)
 end
 
