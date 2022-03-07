@@ -6,14 +6,10 @@
 Dstor         = {}
 Dstor.__index = Dstor
 
-function filter_column(store, column)
-    for kk, item in pairs(store) do
-        if kk == column then
-            return {
-                [column] = item
-            }
-        end
-    end
+function get_only_specific_column(store, column)
+    return {
+        [column] = store[column]
+    }
 end
 
 function parse_key(key)
@@ -39,7 +35,7 @@ function resolve_all_data(store, column)
     for k, value in pairs(store) do
 
         if column and type(value) == 'table' then
-            out[k] = filter_column(value, column)
+            out[k] = get_only_specific_column(value, column)
         elseif not column then
             out[k] = value
         end
@@ -59,7 +55,7 @@ function resolve_data_by_key(store, column, key)
 
             if column and type(value) == 'table' then
                 if value[column] then
-                    out[theKey] = filter_column(value, column)
+                    out[theKey] = get_only_specific_column(value, column)
                 end
             elseif not column then
                 out[theKey] = value
