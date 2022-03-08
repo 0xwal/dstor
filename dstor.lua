@@ -94,3 +94,6 @@ function Dstor:get(key)
     return resolve_data_by_key(self._store, column, keyInTable)
 end
 
+function Dstor:unset(key)
+    self:set(key, nil)
+end
