@@ -44,11 +44,29 @@ function resolve_all_data(store, column)
     return out
 end
 
+function string_start_with(haystack, needle)
+    local haystackLength = #haystack
+    local needleLength   = #(needle or {})
+    if needleLength > haystackLength then
+        return nil
+    end
+
+    for i = 1, needleLength do
+        local haystackChar = string.sub(haystack, i, i)
+        local needleChar   = string.sub(needle, i, i)
+        if needleChar ~= haystackChar then
+            return nil
+        end
+    end
+
+    return 1, needleLength
+end
+
 function resolve_data_by_key(store, column, key)
     local out = {}
     for k, value in pairs(store) do
-        local pattern              = '^' .. key .. '%.'
-        local indexStart, indexEnd = k:find(pattern)
+        local needle               = key .. '.'
+        local indexStart, indexEnd = string_start_with(k, needle)
 
         if indexStart then
             local theKey = k:sub(indexEnd + 1)
